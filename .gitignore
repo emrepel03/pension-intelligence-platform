@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Environment variables
+.env
+.env.*
+
+# Mac
+.DS_Store
+
+# Generated data
+data/raw/*
+data/processed/*
+data/warehouse/*
+powerbi/exports/
+
+# Databases
+*.db
+*.sqlite
+*.sqlite3
+
+# Power BI temporary files
+*.tmp
