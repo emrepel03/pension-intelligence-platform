@@ -163,7 +163,7 @@ pension-intelligence-platform/
 │   └── architecture.md
 ├── powerbi/
 │   ├── dashboard.png
-│   └── exports/                 # Generated CSV exports (not tracked)
+│   └── exports/                # Generated CSV exports (not tracked)
 ├── sql/
 │   ├── analysis_queries.sql
 │   ├── data_quality_checks.sql
