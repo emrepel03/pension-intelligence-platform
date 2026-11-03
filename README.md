@@ -179,8 +179,8 @@ pension-intelligence-platform/
 ├── README.md
 ├── requirements.txt
 └── run_pipeline.py
+```
 
-```markdown
 🚀 Running the Project
 
 1. Clone the repository
