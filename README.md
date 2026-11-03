@@ -92,13 +92,28 @@ Pipeline Components
 
 Stage	Implementation
 Ingestion	Retrieve observations and metadata from CBS
-Transformation	Inspect and prepare source observations
-Warehousing	Load dimension and fact tables into SQLite
+Transformation	Inspect, validate and prepare source observations
+Warehousing	Load fact and dimension tables into SQLite
 Analysis	Execute SQL queries for pension trends
 Data Quality	Validate completeness, consistency and reconciliation
 Reporting	Generate analytical exports for Power BI
 
-The pipeline is orchestrated through run_pipeline.py.
+The complete pipeline is orchestrated through run_pipeline.py.
+
+Data Modelling
+
+The SQLite warehouse uses a dimensional modelling approach.
+
+The central fact table, fact_pension_claims, stores numerical observations and connects to four dimension tables:
+
+* dim_pension_scheme
+* dim_pension_provider
+* dim_claim_status
+* dim_period
+
+The model uses primary keys, foreign keys, unique constraints and non-null validation to maintain data integrity.
+
+This structure separates measurable pension observations from their descriptive business dimensions and supports analytical SQL queries.
 
 📈 Key Findings
 
@@ -147,32 +162,45 @@ These discrepancies were traced back to the raw source data rather than introduc
 
 🧪 Automated Testing
 
-The project includes a Pytest suite covering data quality and reconciliation functionality.
+The project includes a Pytest suite covering data quality, reconciliation and Power BI export validation.
 
-Latest test result: 6 passed.
+Latest test result: 10 passed.
 
 Run the tests locally using:
 
 pytest -v
+```
+📁 Project Structure
 
-## 📁 Project Structure
-
-```text
 pension-intelligence-platform/
 ├── data/                       # Generated data (not tracked)
 ├── docs/
-│   └── architecture.md
+│   ├── architecture.md
+│   └── data_dictionary.md
 ├── powerbi/
 │   ├── dashboard.png
 │   └── exports/                # Generated CSV exports (not tracked)
 ├── sql/
 │   ├── analysis_queries.sql
 │   ├── data_quality_checks.sql
+│   ├── migrate_fact_table.py
 │   └── schema.sql
 ├── src/
 │   ├── ingestion/
+│   │   ├── extract_cbs_data.py
+│   │   ├── inspect_cbs_datasets.py
+│   │   └── inspect_cbs_table.py
 │   ├── transformation/
+│   │   ├── export_powerbi_data.py
+│   │   ├── inspect_raw_data.py
+│   │   ├── load_warehouse.py
+│   │   └── run_analysis.py
 │   └── quality/
+│       ├── generate_reconciliation_report.py
+│       ├── inspect_source_discrepancies.py
+│       ├── investigate_reconciliation.py
+│       ├── profile_cbs_data.py
+│       └── run_quality_checks.py
 ├── tests/
 │   └── test_data_quality.py
 ├── .gitignore
@@ -180,13 +208,12 @@ pension-intelligence-platform/
 ├── requirements.txt
 └── run_pipeline.py
 ```
-
 🚀 Running the Project
 
 1. Clone the repository
 
-git clone https://github.com/emrepel03/-pension-intelligence-platform.git
-cd -pension-intelligence-platform
+git clone https://github.com/emrepel03/pension-intelligence-platform.git
+cd pension-intelligence-platform
 
 2. Create and activate a virtual environment
 
@@ -209,9 +236,10 @@ The pipeline retrieves current data from the CBS API. Consequently, results may 
 
 📚 Documentation
 
-Additional technical documentation is available in the docs/ directory.
+Additional technical documentation is available in the docs/ directory:
 
-* System Architecture
+* System Architecture: Overview of the platform architecture and pipeline components.
+* Data Dictionary: Description of the warehouse schema, measures, dimensions, units and business rules.
 
 ⚠️ Disclaimer
 

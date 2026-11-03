@@ -1,7 +1,6 @@
 import requests
 import json
 import logging
-import time
 
 from pathlib import Path
 from datetime import datetime, timezone
@@ -10,7 +9,6 @@ from urllib3.util.retry import Retry
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-
 RAW_DATA_DIR = PROJECT_ROOT / "data" / "raw"
 
 DATASET_ID = "84184NED"
@@ -23,6 +21,8 @@ HEADERS = {
     "Accept": "application/json"
 }
 
+REQUEST_TIMEOUT = 120
+
 
 # Configure logging
 logging.basicConfig(
@@ -34,8 +34,8 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Configure automatic retries
 def create_session():
+    """Create an HTTP session with automatic retries."""
 
     session = requests.Session()
 
@@ -66,14 +66,29 @@ def fetch_all(endpoint, session):
         response = session.get(
             url,
             headers=HEADERS,
-            timeout=120
+            timeout=REQUEST_TIMEOUT
         )
 
         response.raise_for_status()
 
-        data = response.json()
+        try:
+            data = response.json()
+        except requests.exceptions.JSONDecodeError as error:
+            raise ValueError(
+                f"Invalid JSON response from endpoint: {endpoint}"
+            ) from error
 
-        page_records = data.get("value", [])
+        if not isinstance(data, dict):
+            raise ValueError(
+                f"Unexpected API response structure: {endpoint}"
+            )
+
+        if "value" not in data or not isinstance(data["value"], list):
+            raise ValueError(
+                f"Missing or invalid 'value' field: {endpoint}"
+            )
+
+        page_records = data["value"]
 
         records.extend(page_records)
 
@@ -96,10 +111,14 @@ def fetch_all(endpoint, session):
         page_number
     )
 
-    return records
+    return {
+        "records": records,
+        "pages": page_number
+    }
 
 
 def save_json(filename, records):
+    """Save extracted data using a temporary file."""
 
     output_file = RAW_DATA_DIR / filename
     temporary_file = output_file.with_suffix(".tmp")
@@ -113,7 +132,6 @@ def save_json(filename, records):
             ensure_ascii=False
         )
 
-    # Replace the previous file only after writing succeeds
     temporary_file.replace(output_file)
 
     logger.info(
@@ -149,17 +167,21 @@ def main():
 
             logger.info("Extracting endpoint: %s", endpoint)
 
-            records = fetch_all(endpoint, session)
+            result = fetch_all(endpoint, session)
+
+            records = result["records"]
 
             save_json(
                 f"{DATASET_ID}_{filename}.json",
                 records
             )
 
-            extraction_summary[endpoint] = len(records)
+            extraction_summary[endpoint] = {
+                "records": len(records),
+                "pages": result["pages"]
+            }
 
     finally:
-
         session.close()
 
     metadata = {
@@ -168,7 +190,10 @@ def main():
         "extracted_at": datetime.now(timezone.utc).isoformat(),
         "started_at": extraction_start.isoformat(),
         "endpoints": extraction_summary,
-        "total_records": sum(extraction_summary.values())
+        "total_records": sum(
+            endpoint["records"]
+            for endpoint in extraction_summary.values()
+        )
     }
 
     save_json(

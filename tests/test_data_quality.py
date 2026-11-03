@@ -1,5 +1,12 @@
 import sqlite3
 import pandas as pd
+import pytest
+
+from src.transformation.export_powerbi_data import (
+    validate_export,
+    expected_columns,
+    OUTPUT_DIR,
+)
 
 DB_PATH = "data/warehouse/pension_analytics.db"
 REPORT_PATH = "data/processed/reconciliation_exceptions.csv"
@@ -68,3 +75,38 @@ def test_reconciliation_report_has_no_unexpected_warnings():
 
     assert (report["status"] == "WARNING").sum() == 3
     assert (report["status"] == "PASS").sum() == 17
+
+def test_all_powerbi_exports_exist():
+    for filename in expected_columns:
+        output_file = OUTPUT_DIR / f"{filename}.csv"
+        assert output_file.exists(), f"Missing export: {filename}.csv"
+
+
+def test_powerbi_exports_are_not_empty():
+    for filename in expected_columns:
+        output_file = OUTPUT_DIR / f"{filename}.csv"
+        df = pd.read_csv(output_file)
+
+        assert not df.empty, f"{filename}.csv is empty"
+
+
+def test_powerbi_exports_have_expected_columns():
+    for filename, columns in expected_columns.items():
+        output_file = OUTPUT_DIR / f"{filename}.csv"
+        df = pd.read_csv(output_file)
+
+        assert list(df.columns) == columns
+
+
+def test_export_validation_rejects_missing_values():
+    df = pd.DataFrame({
+        "year": [2025],
+        "pension_claims": [None],
+    })
+
+    with pytest.raises(ValueError, match="Missing values"):
+        validate_export(
+            "test_export",
+            df,
+            ["year", "pension_claims"],
+        )

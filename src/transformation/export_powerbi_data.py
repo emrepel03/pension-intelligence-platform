@@ -96,7 +96,37 @@ queries = {
 }
 
 
+def validate_export(filename, df, expected_columns):
+
+    if df.empty:
+        raise ValueError(f"{filename}: Export contains no data.")
+
+    if list(df.columns) != expected_columns:
+        raise ValueError(
+            f"{filename}: Unexpected columns. "
+            f"Expected {expected_columns}, got {list(df.columns)}"
+        )
+
+    if df.isnull().any().any():
+        raise ValueError(f"{filename}: Missing values detected.")
+
+    print(f"VALIDATED: {filename} | {len(df)} rows")
+
+
+expected_columns = {
+    "annual_pension_trends": ["year", "pension_claims"],
+    "annual_accrued_pension": ["year", "accrued_pension_euros"],
+    "claims_by_status": ["year", "status_name", "pension_claims"],
+    "claims_by_scheme": ["year", "scheme_name", "pension_claims"]
+}
+
+
 def main():
+
+    if not DATABASE.exists():
+        raise FileNotFoundError(f"Database not found: {DATABASE}")
+
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     with sqlite3.connect(DATABASE) as connection:
 
@@ -104,11 +134,19 @@ def main():
 
             df = pd.read_sql_query(query, connection)
 
+            validate_export(
+                filename,
+                df,
+                expected_columns[filename]
+            )
+
             output_file = OUTPUT_DIR / f"{filename}.csv"
+            temporary_file = output_file.with_suffix(".tmp")
 
-            df.to_csv(output_file, index=False)
+            df.to_csv(temporary_file, index=False)
+            temporary_file.replace(output_file)
 
-            print(f"Exported {filename}: {len(df)} rows")
+            print(f"EXPORTED: {output_file.name}")
 
 
 if __name__ == "__main__":

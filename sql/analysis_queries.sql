@@ -129,7 +129,10 @@ WHERE f.measure_code = 'M002011'
 
 ORDER BY f.value DESC;
 
--- Investigate 2018 claim status reconciliation
+-- =====================================================
+-- 5. DATA QUALITY INVESTIGATION
+-- Investigate 2018 claim status reconciliation discrepancy
+-- =====================================================
 
 SELECT
     s.status_code,

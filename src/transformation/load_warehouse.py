@@ -13,6 +13,83 @@ def load_json(filename):
     with open(RAW_DIR / filename, encoding="utf-8") as file:
         return json.load(file)
 
+def validate_observations(observations):
+    """Validate raw CBS observations before warehouse loading."""
+
+    required_fields = [
+        "Id",
+        "Measure",
+        "Value",
+        "Pensioenregelingen",
+        "Pensioenuitvoerders",
+        "StatusPensioenaanspraken",
+        "Perioden"
+    ]
+
+    for index, item in enumerate(observations):
+
+        missing_fields = [
+            field for field in required_fields
+            if field not in item or item[field] is None
+        ]
+
+        if missing_fields:
+            raise ValueError(
+                f"Observation {index} is missing fields: {missing_fields}"
+            )
+
+        if not isinstance(item["Value"], (int, float)):
+            raise ValueError(
+                f"Observation {item['Id']} has an invalid numeric value."
+            )
+
+        if not isinstance(item["Perioden"], str):
+            raise ValueError(
+                f"Observation {item['Id']} has an invalid period."
+            )
+
+    observation_ids = [
+        item["Id"] for item in observations
+    ]
+
+    if len(observation_ids) != len(set(observation_ids)):
+        raise ValueError("Duplicate observation IDs found in source data.")
+
+    print(
+        f"Source validation passed: {len(observations):,} observations."
+    )
+
+def validate_dimension_references(
+    observations,
+    scheme_lookup,
+    provider_lookup,
+    status_lookup,
+    period_lookup
+):
+    """Ensure every observation references existing dimension records."""
+
+    references = {
+        "Pensioenregelingen": scheme_lookup,
+        "Pensioenuitvoerders": provider_lookup,
+        "StatusPensioenaanspraken": status_lookup,
+        "Perioden": period_lookup
+    }
+
+    for field, lookup in references.items():
+
+        source_codes = {
+            item[field] for item in observations
+        }
+
+        missing_codes = source_codes - set(lookup.keys())
+
+        if missing_codes:
+            raise ValueError(
+                f"Unknown {field} codes found: "
+                f"{sorted(missing_codes)}"
+            )
+
+    print("Dimension reference validation passed.")
 
 def extract_year(period_code):
     match = re.match(r"^(\d{4})", period_code)
@@ -28,6 +105,8 @@ def main():
     schemes = load_json("84184NED_pension_schemes.json")
     providers = load_json("84184NED_pension_providers.json")
     statuses = load_json("84184NED_claim_statuses.json")
+
+    validate_observations(observations)
 
     connection = sqlite3.connect(DATABASE)
 
@@ -94,6 +173,14 @@ def main():
         period_lookup = dict(connection.execute(
             "SELECT period_code, period_key FROM dim_period"
         ).fetchall())
+
+        validate_dimension_references(
+            observations,
+            scheme_lookup,
+            provider_lookup,
+            status_lookup,
+            period_lookup
+        )
 
         fact_rows = [
             (

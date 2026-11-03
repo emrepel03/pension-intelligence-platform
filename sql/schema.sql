@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS dim_period (
 CREATE TABLE IF NOT EXISTS fact_pension_claims (
     observation_id INTEGER PRIMARY KEY,
     measure_code TEXT NOT NULL,
-    value REAL,
+    value REAL NOT NULL,
     scheme_key INTEGER NOT NULL,
     provider_key INTEGER NOT NULL,
     status_key INTEGER NOT NULL,
