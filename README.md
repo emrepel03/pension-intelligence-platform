@@ -155,8 +155,9 @@ Run the tests locally using:
 
 pytest -v
 
-📁 Project Structure
+## 📁 Project Structure
 
+```text
 pension-intelligence-platform/
 ├── data/                       # Generated data (not tracked)
 ├── docs/
