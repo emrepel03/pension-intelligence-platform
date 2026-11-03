@@ -1,4 +1,4 @@
-🏦 Pension Intelligence Platform
+# 🏦 Pension Intelligence Platform
 
 An end-to-end data engineering and business intelligence project analysing Dutch occupational pension statistics.
 
@@ -7,6 +7,7 @@ Built with Python, SQL, SQLite and Power BI, this project transforms public CBS 
 <p align="center">
   <img src="powerbi/dashboard.png" alt="Pension Intelligence Platform Power BI Dashboard" width="100%">
 </p>
+
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3.x-blue?logo=python" alt="Python">
   <img src="https://img.shields.io/badge/SQL-SQLite-lightgrey?logo=sqlite" alt="SQL">
@@ -15,68 +16,70 @@ Built with Python, SQL, SQLite and Power BI, this project transforms public CBS 
   <img src="https://img.shields.io/badge/Status-Completed-success" alt="Project status">
 </p>
 
-⸻
+---
 
-📌 Project Overview
+## 📌 Project Overview
 
 The Pension Intelligence Platform is an independent data engineering and business intelligence project built around Dutch occupational pension statistics.
 
 It demonstrates a complete analytical workflow:
 
-* API integration and data ingestion
-* Data profiling and transformation
-* Relational data warehousing
-* SQL-based business analysis
-* Automated data quality validation
-* Data reconciliation and reporting
-* Power BI dashboard development
+- API integration and data ingestion
+- Data profiling and transformation
+- Relational data warehousing
+- SQL-based business analysis
+- Automated data quality validation
+- Data reconciliation and reporting
+- Power BI dashboard development
 
 The analysis covers 2016–2025 and focuses on pension claims, accrued pension amounts, claim status and pension scheme types.
 
-🎯 Business Objectives
+## 🎯 Business Objectives
 
 The project aims to answer several questions:
 
-* How have occupational pension claims developed over time?
-* How have accrued gross annual pension amounts changed?
-* What proportion of pension claims are active versus inactive?
-* How are pension claims distributed across defined benefit and defined contribution schemes?
-* Can the source data be reconciled and validated reliably?
+- How have occupational pension claims developed over time?
+- How have accrued gross annual pension amounts changed?
+- What proportion of pension claims are active versus inactive?
+- How are pension claims distributed across defined benefit and defined contribution schemes?
+- Can the source data be reconciled and validated reliably?
 
-🛠️ Technology Stack
+## 🛠️ Technology Stack
 
-Technology	Purpose
-Python	Data ingestion and pipeline orchestration
-Pandas	Data processing and transformation
-Requests	CBS OData API integration
-SQLite	Relational data warehouse
-SQL	Data modelling and business analysis
-Pytest	Automated testing
-Power BI	Business intelligence and visualisation
-Git & GitHub	Version control
+| Technology | Purpose |
+|---|---|
+| Python | Data ingestion and pipeline orchestration |
+| Pandas | Data processing and transformation |
+| Requests | CBS OData API integration |
+| SQLite | Relational data warehouse |
+| SQL | Data modelling and business analysis |
+| Pytest | Automated testing |
+| Power BI | Business intelligence and visualisation |
+| Git & GitHub | Version control |
 
-📊 Data Source
+## 📊 Data Source
 
-Statistics Netherlands (CBS)
+**Statistics Netherlands (CBS)**
 
-Dataset: 84184NED — Arbeidsgerelateerd ouderdomspensioen; aanspraken, uitvoerders, regelingen.
+**Dataset:** 84184NED — Arbeidsgerelateerd ouderdomspensioen; aanspraken, uitvoerders, regelingen.
 
 The dataset provides annual statistics on occupational pension claims, pension providers and pension schemes.
 
 The project uses three measures:
 
-* Number of pension claims
-* Accrued gross annual pension amount
-* Potential gross annual pension amount
+- Number of pension claims
+- Accrued gross annual pension amount
+- Potential gross annual pension amount
 
 Monetary values are converted from thousands of euros into euros for reporting.
 
-Important: Pension claims are not equivalent to unique individuals, and accrued annual pension amounts are not pension fund assets under management.
+**Important:** Pension claims are not equivalent to unique individuals, and accrued annual pension amounts are not pension fund assets under management.
 
-⚙️ Data Architecture
+## ⚙️ Data Architecture
 
 The pipeline follows a modular architecture, separating ingestion, transformation, storage, analysis and reporting.
 
+```mermaid
 flowchart TD
     A[CBS OData API] --> B[Python Ingestion]
     B --> C[Raw JSON Data]
@@ -87,91 +90,98 @@ flowchart TD
     F --> H[Power BI Exports]
     G --> I[Reconciliation Report]
     H --> J[Power BI Dashboard]
+```
 
-Pipeline Components
+### Pipeline Components
 
-Stage	Implementation
-Ingestion	Retrieve observations and metadata from CBS
-Transformation	Inspect, validate and prepare source observations
-Warehousing	Load fact and dimension tables into SQLite
-Analysis	Execute SQL queries for pension trends
-Data Quality	Validate completeness, consistency and reconciliation
-Reporting	Generate analytical exports for Power BI
+| Stage | Implementation |
+|---|---|
+| Ingestion | Retrieve observations and metadata from CBS |
+| Transformation | Inspect, validate and prepare source observations |
+| Warehousing | Load fact and dimension tables into SQLite |
+| Analysis | Execute SQL queries for pension trends |
+| Data Quality | Validate completeness, consistency and reconciliation |
+| Reporting | Generate analytical exports for Power BI |
 
-The complete pipeline is orchestrated through run_pipeline.py.
+The complete pipeline is orchestrated through `run_pipeline.py`.
 
-Data Modelling
+### Data Modelling
 
 The SQLite warehouse uses a dimensional modelling approach.
 
-The central fact table, fact_pension_claims, stores numerical observations and connects to four dimension tables:
+The central fact table, `fact_pension_claims`, stores numerical observations and connects to four dimension tables:
 
-* dim_pension_scheme
-* dim_pension_provider
-* dim_claim_status
-* dim_period
+- `dim_pension_scheme`
+- `dim_pension_provider`
+- `dim_claim_status`
+- `dim_period`
 
 The model uses primary keys, foreign keys, unique constraints and non-null validation to maintain data integrity.
 
 This structure separates measurable pension observations from their descriptive business dimensions and supports analytical SQL queries.
 
-📈 Key Findings
+## 📈 Key Findings
 
 Based on the extracted CBS observations:
 
-Indicator	Result
-Pension claims (2025)	21.86 million
-Accrued gross annual pension amount (2025)	€75.86 billion
-Growth in pension claims (2016–2025)	+9.9%
-Growth in accrued pension amounts (2016–2025)	Approximately +40%
-Inactive pension claim share (2025)	Approximately 61.9%
+| Indicator | Result |
+|---|---:|
+| Pension claims (2025) | 21.86 million |
+| Accrued gross annual pension amount (2025) | €75.86 billion |
+| Growth in pension claims (2016–2025) | +9.9% |
+| Growth in accrued pension amounts (2016–2025) | Approximately +40% |
+| Inactive pension claim share (2025) | Approximately 61.9% |
 
-Interpretation
+### Interpretation
 
-* The number of pension claims increased over the observation period.
-* Accrued gross annual pension amounts grew faster than the number of claims.
-* Inactive claims represented approximately 61.9% of total claims in 2025.
+- The number of pension claims increased over the observation period.
+- Accrued gross annual pension amounts grew faster than the number of claims.
+- Inactive claims represented approximately 61.9% of total claims in 2025.
 
-Data interpretation: Growth in accrued pension amounts is nominal and has not been adjusted for inflation. The statistics describe pension claims rather than unique individuals.
+**Data interpretation:** Growth in accrued pension amounts is nominal and has not been adjusted for inflation. The statistics describe pension claims rather than unique individuals.
 
-🔍 Data Quality & Validation
+## 🔍 Data Quality & Validation
 
 Data reliability is an important part of the platform.
 
 Automated checks cover:
 
-* Duplicate observations
-* Missing numerical values
-* Negative numerical values
-* Reconciliation by pension claim status
-* Reconciliation by pension scheme
+- Duplicate observations
+- Missing numerical values
+- Negative numerical values
+- Reconciliation by pension claim status
+- Reconciliation by pension scheme
 
-Reconciliation Results
+### Reconciliation Results
 
 The reconciliation process evaluates aggregate totals against their corresponding category breakdowns.
 
 Across 20 reconciliation outcomes:
 
-Result	Count
-Passed	17
-Warnings	3
+| Result | Count |
+|---|---:|
+| Passed | 17 |
+| Warnings | 3 |
 
 Three small discrepancies were identified in the original CBS source observations.
 
 These discrepancies were traced back to the raw source data rather than introduced during transformation. They are reported transparently instead of being silently corrected.
 
-🧪 Automated Testing
+## 🧪 Automated Testing
 
 The project includes a Pytest suite covering data quality, reconciliation and Power BI export validation.
 
-Latest test result: 10 passed.
+**Latest test result: 10 passed.**
 
 Run the tests locally using:
 
+```bash
 pytest -v
 ```
-📁 Project Structure
 
+## 📁 Project Structure
+
+```text
 pension-intelligence-platform/
 ├── data/                       # Generated data (not tracked)
 ├── docs/
@@ -208,40 +218,51 @@ pension-intelligence-platform/
 ├── requirements.txt
 └── run_pipeline.py
 ```
-🚀 Running the Project
 
-1. Clone the repository
+## 🚀 Running the Project
 
+### 1. Clone the repository
+
+```bash
 git clone https://github.com/emrepel03/pension-intelligence-platform.git
 cd pension-intelligence-platform
+```
 
-2. Create and activate a virtual environment
+### 2. Create and activate a virtual environment
 
+```bash
 python3 -m venv .venv
 source .venv/bin/activate
+```
 
-3. Install dependencies
+### 3. Install dependencies
 
+```bash
 pip install -r requirements.txt
+```
 
-4. Run the complete pipeline
+### 4. Run the complete pipeline
 
+```bash
 python run_pipeline.py
+```
 
-5. Run automated tests
+### 5. Run automated tests
 
+```bash
 pytest -v
+```
 
 The pipeline retrieves current data from the CBS API. Consequently, results may change when the source dataset is updated.
 
-📚 Documentation
+## 📚 Documentation
 
-Additional technical documentation is available in the docs/ directory:
+Additional technical documentation is available in the `docs/` directory:
 
-* System Architecture: Overview of the platform architecture and pipeline components.
-* Data Dictionary: Description of the warehouse schema, measures, dimensions, units and business rules.
+- **System Architecture:** Overview of the platform architecture and pipeline components.
+- **Data Dictionary:** Description of the warehouse schema, measures, dimensions, units and business rules.
 
-⚠️ Disclaimer
+## ⚠️ Disclaimer
 
 This is an independent portfolio project developed for educational and analytical purposes using publicly available CBS statistical data.
 
